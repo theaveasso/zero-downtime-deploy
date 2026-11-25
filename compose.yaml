@@ -1,0 +1,57 @@
+services:
+  traefik:
+    image: traefik:v3.2
+    ports:
+      - "8080:80"      # the app, through the proxy
+      - "8081:8080"    # Traefik dashboard
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
+
+  app-blue:
+    image: ${APP_IMAGE_BLUE:-zdd-app:local}
+    build: ./app
+    environment:
+      APP_COLOR: blue
+      APP_VERSION: ${APP_VERSION_BLUE:-dev}
+    stop_grace_period: 30s
+
+  app-green:
+    image: ${APP_IMAGE_GREEN:-zdd-app:local}
+    build: ./app
+    environment:
+      APP_COLOR: green
+      APP_VERSION: ${APP_VERSION_GREEN:-dev}
+    stop_grace_period: 30s
+    profiles: ["green"]   # only started by the deploy script
+
+  # Milestone 3
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: zdd
+    profiles: ["m3"]
+
+  redis:
+    image: redis:7-alpine
+    profiles: ["m3"]
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    profiles: ["m3"]
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3000"
+    profiles: ["m3"]

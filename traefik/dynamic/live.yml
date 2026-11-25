@@ -1,0 +1,25 @@
+# The deploy script rewrites this file to switch traffic between colours.
+# Traefik watches the directory and applies the change without a restart.
+http:
+  routers:
+    app:
+      rule: "PathPrefix(`/`)"
+      entryPoints: [web]
+      service: app-blue
+  services:
+    app-blue:
+      loadBalancer:
+        healthCheck:
+          path: /readyz
+          interval: 2s
+          timeout: 1s
+        servers:
+          - url: "http://app-blue:3000"
+    app-green:
+      loadBalancer:
+        healthCheck:
+          path: /readyz
+          interval: 2s
+          timeout: 1s
+        servers:
+          - url: "http://app-green:3000"
