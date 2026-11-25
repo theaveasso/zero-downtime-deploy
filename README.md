@@ -11,7 +11,7 @@ company: blue-green deploys, graceful shutdown, and background jobs that survive
 
 ```
             ┌──────────── Traefik (reverse proxy) ───────────────┐
-request ──▶ │  routes 100% of traffic to the "live" colour        │
+request ──▶│  routes 100% of traffic to the "live" colour        │
             └───────────────┬───────────────────────┬────────────┘
                             ▼                       ▼
                      app-blue (v1)           app-green (v2, idle)
